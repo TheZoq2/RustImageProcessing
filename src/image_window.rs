@@ -1,6 +1,12 @@
+extern crate rscam;
+
 use glium;
+use glium::texture::RawImage2d;
 
 use glium::DisplayBuild;
+use glium::Surface;
+
+use std::vec::Vec;
 
 const VERTEX_SHADER: &str = r#"
     #version 140
@@ -40,7 +46,7 @@ pub struct ImageWindow
     display: glium::Display,
 
     triangles: glium::VertexBuffer<Vertex>,
-    program: glium::program::Program,
+    program: glium::Program,
 }
 
 impl ImageWindow
@@ -65,11 +71,19 @@ impl ImageWindow
         let triangles = 
             glium::VertexBuffer::new(&display, &Self::init_triangles()).unwrap();
 
+        let program = glium::Program::from_source(
+                &display,
+                VERTEX_SHADER,
+                FRAGMENT_SHADER,
+                None
+            ).unwrap();
+
         ImageWindow {
             resolution,
             display,
 
-            triangles
+            triangles,
+            program
         }
     }
 
@@ -82,8 +96,29 @@ impl ImageWindow
         }
     }
 
-    pub fn draw_image(&self, )
+    pub fn draw_image(&self, image: &rscam::Frame)
     {
-        
+        let mut pixel_vec = vec!();
+        pixel_vec.extend_from_slice(image as &[u8]);
+
+        let image = RawImage2d::from_raw_rgba(pixel_vec, image.resolution);
+
+        let texture = glium::texture::SrgbTexture2d::new(&self.display, image).unwrap();
+
+        let uniforms = uniform! {
+            texture: texture.sampled()
+        };
+
+        let mut target = self.display.draw();
+
+        let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
+        target.draw(&self.triangles,
+                &indices,
+                &self.program,
+                &uniforms,
+                &Default::default()
+            ).unwrap();
+
+        target.finish().unwrap();
     }
 }

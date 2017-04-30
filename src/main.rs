@@ -19,7 +19,9 @@ fn main()
 
     loop
     {
-        camera.capture().unwrap();
+        let image = camera.capture().unwrap();
+
+        window.draw_image(&image);
 
         window.handle_events();
     }
