@@ -1,0 +1,8 @@
+[package]
+name = "image_processing"
+version = "0.1.0"
+authors = ["TheZoq2 <frans.skarman@gmail.com>"]
+
+[dependencies]
+rscam = "*"
+glium = "*"
