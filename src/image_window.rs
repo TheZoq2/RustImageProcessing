@@ -6,14 +6,19 @@ use glium::texture::RawImage2d;
 use glium::DisplayBuild;
 use glium::Surface;
 
-use std::vec::Vec;
+use image;
+use image::RgbPixel;
 
 const VERTEX_SHADER: &str = r#"
     #version 140
 
     in vec2 position;
+    in vec2 tex_coords;
+
+    out vec2 v_tex_coords;
 
     void main() {
+        v_tex_coords = tex_coords;
         gl_Position = vec4(position, 0.0, 1.0);
     }
 "#;
@@ -21,10 +26,13 @@ const VERTEX_SHADER: &str = r#"
 const FRAGMENT_SHADER: &str = r#"
     #version 140
 
+    in vec2 v_tex_coords;
     out vec4 color;
 
+    uniform sampler2D tex;
+
     void main() {
-        color = vec4(1.0, 0.0, 0.0, 1.0);
+        color = vec4(texture(tex, vec2(v_tex_coords.x, -v_tex_coords.y)));
     }
 "#;
 
@@ -96,12 +104,12 @@ impl ImageWindow
         }
     }
 
-    pub fn draw_image(&self, image: &rscam::Frame)
+    pub fn draw_image(&self, image: &image::Image<RgbPixel>)
     {
         let mut pixel_vec = vec!();
-        pixel_vec.extend_from_slice(image as &[u8]);
+        pixel_vec.extend_from_slice(&image.data);
 
-        let image = RawImage2d::from_raw_rgba(pixel_vec, image.resolution);
+        let image = RawImage2d::from_raw_rgb(pixel_vec, image.resolution);
 
         let texture = glium::texture::SrgbTexture2d::new(&self.display, image).unwrap();
 
@@ -111,7 +119,7 @@ impl ImageWindow
 
         let mut target = self.display.draw();
 
-        let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
+        let indices = glium::index::NoIndices(glium::index::PrimitiveType::TriangleFan);
         target.draw(&self.triangles,
                 &indices,
                 &self.program,
