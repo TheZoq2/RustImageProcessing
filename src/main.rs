@@ -111,6 +111,12 @@ fn grayscale_to_rgb(image: &image::Image<GrayscalePixel>) -> image::Image<RgbPix
 }
 
 
+fn convolve<P1: image::Pixel, P2: image::Pixel>(
+        source: image::Image<P1>,
+    ) -> image::Image<P2>
+{
+    unimplemented!()
+}
 
 fn main() 
 {
