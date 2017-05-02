@@ -116,7 +116,7 @@ fn kernel_convolution<P1: image::Pixel, P2: image::Pixel>(
         kernel: &[&[u8]]
     ) -> image::Image<P2>
 {
-    //Go through all the pixels
+    unimplemented!();
 }
 
 fn main() 
