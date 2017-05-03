@@ -106,12 +106,9 @@ impl ImageWindow
 
     pub fn draw_image(&self, image: &image::Image<RgbPixel>)
     {
-        let mut pixel_vec = vec!();
-        pixel_vec.extend_from_slice(&image.data);
+        let glium_image = RawImage2d::from_raw_rgb(image.get_raw(), image.resolution);
 
-        let image = RawImage2d::from_raw_rgb(pixel_vec, image.resolution);
-
-        let texture = glium::texture::SrgbTexture2d::new(&self.display, image).unwrap();
+        let texture = glium::texture::SrgbTexture2d::new(&self.display, glium_image).unwrap();
 
         let uniforms = uniform! {
             texture: texture.sampled()

@@ -35,7 +35,7 @@ fn clamp(value: i32) -> u8
 
   https://en.wikipedia.org/wiki/YUV
 */
-fn yuv444_to_rgb888(source: &[u8; 3], destination: &mut [u8])
+fn yuv444_to_rgb888(source: &[u8; 3]) -> RgbPixel
 {
     let c = source[0] as i32 - 16;
     let d = source[1] as i32 - 128;
@@ -45,39 +45,37 @@ fn yuv444_to_rgb888(source: &[u8; 3], destination: &mut [u8])
     let g = clamp((298*c - 100*d - 208 * e + 128) >> 8);
     let b = clamp((298*c + 516*d + 128) >> 8);
 
-    destination[0]=r;
-    destination[1]=g;
-    destination[2]=b;
+    RgbPixel::new(r, g, b)
 }
 
 /**
   Takes 4 bytes of yuv422, converts them to rgb and puts the result in destination
 */
-fn yuv422_to_rgb888(source: &[u8], dest: &mut [u8])
+fn yuv422_to_rgb888(source: &[u8]) -> (RgbPixel, RgbPixel)
 {
     let y1 = source[0];
     let u = source[1];
     let y2 = source[2];
     let v = source[3];
 
-    yuv444_to_rgb888(&[y1,u,v], &mut dest[0..3]);
-    yuv444_to_rgb888(&[y2,u,v], &mut dest[3..6]);
+    (yuv444_to_rgb888(&[y1, u, v]), yuv444_to_rgb888(&[y2, u, v]))
 }
 
 
 fn yuv422_image_to_rgb(source: &rscam::Frame) -> image::Image<RgbPixel>
 {
-    let mut image = image::Image::new(source.resolution);
+    let mut image = image::Image::<RgbPixel>::new(source.resolution);
 
     for i in 0..(image.resolution.0 * image.resolution.1 / 2)
     {
         let source_offset = (i * 4) as usize;
-        let destination_offset = (i * 6) as usize;
+        let destination_offset = (i * 2) as usize;
 
-        yuv422_to_rgb888(
-                &source[source_offset..source_offset+4],
-                &mut image.data[destination_offset..destination_offset + 6],
-            );
+        let rgb = yuv422_to_rgb888(&source[source_offset..source_offset+4]);
+
+        image.set_pixel_by_index(destination_offset, rgb.0);
+        image.set_pixel_by_index(destination_offset+1, rgb.1);
+
     }
 
     image
@@ -85,13 +83,14 @@ fn yuv422_image_to_rgb(source: &rscam::Frame) -> image::Image<RgbPixel>
 
 fn rgb_to_greyscale(image: &image::Image<RgbPixel>) -> image::Image<GrayscalePixel>
 {
-    let mut result = image::Image::new(image.resolution);
+    let mut result = image::Image::<GrayscalePixel>::new(image.resolution);
 
     for i in 0..result.len()
     {
-        let rgb = &image.data[(i*3)..(i*3) + 3];
+        let rgb = image.get_pixel_by_index(i);
 
-        result.data[i] = ((rgb[0] as u16 + rgb[1] as u16 + rgb[2] as u16) / 3) as u8;
+        let value = ((rgb.data[0] as u16 + rgb.data[1] as u16 + rgb.data[2] as u16) / 3) as u8;
+        result.data[i] = GrayscalePixel::new(value);
     }
 
     result
@@ -99,25 +98,25 @@ fn rgb_to_greyscale(image: &image::Image<RgbPixel>) -> image::Image<GrayscalePix
 
 fn grayscale_to_rgb(image: &image::Image<GrayscalePixel>) -> image::Image<RgbPixel>
 {
-    let mut result = image::Image::new(image.resolution);
+    let mut result = image::Image::<RgbPixel>::new(image.resolution);
 
     for i in 0..image.len()
     {
-        result.data[i*3] = image.data[i];
-        result.data[i*3 + 1] = image.data[i];
-        result.data[i*3 + 2] = image.data[i]
+        let value = image.data[i].data;
+
+        result.set_pixel_by_index(i, RgbPixel::new(value, value, value));
     }
     result
 }
 
 
-fn kernel_convolution<P1: image::Pixel, P2: image::Pixel>(
-        source: image::Image<P1>,
-        kernel: &[&[u8]]
-    ) -> image::Image<P2>
-{
-    unimplemented!();
-}
+//fn kernel_convolution<P1: image::Pixel, P2: image::Pixel>(
+//        source: image::Image<P1>,
+//        kernel: &[&[u8]]
+//    ) -> image::Image<P2>
+//{
+//    unimplemented!();
+//}
 
 fn main() 
 {
