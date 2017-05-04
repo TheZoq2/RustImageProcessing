@@ -95,7 +95,7 @@ impl<P: Pixel> Image<P>
 
     fn index_from_coords(&self, x: i32, y: i32) -> usize
     {
-        (x as u32 * self.resolution.0 + y as u32) as usize
+        (x + y * self.resolution.0 as i32) as usize
     }
 
     pub fn get_pixel(&self, x: u32, y: u32) -> P

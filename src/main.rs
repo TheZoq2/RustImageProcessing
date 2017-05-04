@@ -122,6 +122,21 @@ fn main()
 
     let window = ImageWindow::new((640, 480));
     let grayscale_window = ImageWindow::new((640, 480));
+    let smoothed_window = ImageWindow::new((640, 480));
+
+    let kernel = {
+        let data = vec!(
+                vec!(1.,1.,1.,1.,1.,1.,1.),
+                vec!(1.,1.,1.,1.,1.,1.,1.),
+                vec!(1.,1.,1.,1.,1.,1.,1.),
+                vec!(1.,1.,1.,1.,1.,1.,1.),
+                vec!(1.,1.,1.,1.,1.,1.,1.),
+                vec!(1.,1.,1.,1.,1.,1.,1.),
+                vec!(1.,1.,1.,1.,1.,1.,1.),
+            );
+
+        kernel::Kernel::new(4, data)
+    };
 
     loop
     {
@@ -131,8 +146,11 @@ fn main()
 
         let grayscale = rgb_to_greyscale(&rgb_image);
 
+        let smoothed = kernel::kernel_convolution(&grayscale, &kernel);
+
         window.draw_image(rgb_image);
         grayscale_window.draw_image(&grayscale_to_rgb(&grayscale));
+        smoothed_window.draw_image(&grayscale_to_rgb(&smoothed));
 
         window.handle_events();
     }
