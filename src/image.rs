@@ -93,21 +93,38 @@ impl<P: Pixel> Image<P>
         result
     }
 
-    fn index_from_coords(&self, x: u32, y: u32) -> usize
+    fn index_from_coords(&self, x: i32, y: i32) -> usize
     {
-        (x * self.resolution.0 + y) as usize
+        (x as u32 * self.resolution.0 + y as u32) as usize
     }
 
     pub fn get_pixel(&self, x: u32, y: u32) -> P
     {
-        assert!(x < self.resolution.0);
+        self.maybe_get_pixel(x as i32, y as i32).unwrap()
+    }
 
-        self.data[self.index_from_coords(x,y)].clone()
+    pub fn maybe_get_pixel(&self, x: i32, y: i32) -> Option<P>
+    {
+        if x > self.resolution.0 as i32
+        {
+            return None
+        }
+
+        let index = self.index_from_coords(x, y);
+
+        if index < self.data.len()
+        {
+            Some(self.data[index].clone())
+        }
+        else
+        {
+            None
+        }
     }
 
     pub fn set_pixel(&mut self, x: u32, y: u32, pixel: P)
     {
-        let index = self.index_from_coords(x,y);
+        let index = self.index_from_coords(x as i32, y as i32);
         self.data[index] = pixel;
     }
 

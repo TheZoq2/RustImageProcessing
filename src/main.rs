@@ -5,6 +5,7 @@ extern crate glium;
 
 mod image_window;
 mod image;
+mod kernel;
 
 
 use image_window::ImageWindow;
@@ -110,14 +111,6 @@ fn grayscale_to_rgb(image: &image::Image<GrayscalePixel>) -> image::Image<RgbPix
 }
 
 
-//fn kernel_convolution<P1: image::Pixel, P2: image::Pixel>(
-//        source: image::Image<P1>,
-//        kernel: &[&[u8]]
-//    ) -> image::Image<P2>
-//{
-//    unimplemented!();
-//}
-
 fn main() 
 {
     let mut camera = rscam::Camera::new("/dev/video0").unwrap();
@@ -144,3 +137,6 @@ fn main()
         window.handle_events();
     }
 }
+
+
+
