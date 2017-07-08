@@ -1,6 +1,8 @@
 use image;
 use image::{RgbPixel, GrayscalePixel};
 
+extern crate time;
+
 pub struct Kernel
 {
     data: Vec<Vec<f32>>,
@@ -40,7 +42,8 @@ pub fn kernel_convolution(
 {
     let mut result = image::Image::<GrayscalePixel>::new(source.resolution);
 
-    //Go through all the target pixels
+
+    // Go through all the target pixels
     for x in 0..source.resolution.0
     {
         for y in 0..source.resolution.1
@@ -70,6 +73,7 @@ pub fn kernel_convolution(
             result.set_pixel(x, y, GrayscalePixel::new((kernel_sum / kernel_amount as f32) as u8));
         }
     }
+
 
     result
 }

@@ -138,7 +138,7 @@ fn main()
         kernel::Kernel::new(4, data)
     };
 
-    loop
+    for i in (0..10)
     {
         let image = camera.capture().unwrap();
 
@@ -148,9 +148,9 @@ fn main()
 
         let smoothed = kernel::kernel_convolution(&grayscale, &kernel);
 
-        window.draw_image(rgb_image);
-        grayscale_window.draw_image(&grayscale_to_rgb(&grayscale));
-        smoothed_window.draw_image(&grayscale_to_rgb(&smoothed));
+        //window.draw_image(rgb_image);
+        //grayscale_window.draw_image(&grayscale_to_rgb(&grayscale));
+        //smoothed_window.draw_image(&grayscale_to_rgb(&smoothed));
 
         window.handle_events();
     }

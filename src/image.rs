@@ -65,6 +65,7 @@ pub struct Image<P: Pixel>
 {
     pub data: Vec<P>,
     pub resolution: (u32, u32),
+    pixel_amount: usize
 }
 
 impl<P: Pixel> Image<P>
@@ -112,7 +113,7 @@ impl<P: Pixel> Image<P>
 
         let index = self.index_from_coords(x, y);
 
-        if index < self.data.len()
+        if index < self.pixel_amount
         {
             Some(self.data[index].clone())
         }
@@ -149,9 +150,12 @@ macro_rules! implement_image_new {
                 let mut data = Vec::new();
                 data.resize(Self::get_pixel_amount(resolution), $intial_value);
 
+                let pixel_amount = data.len();
+
                 Image {
                     data,
-                    resolution
+                    resolution,
+                    pixel_amount
                 }
             }
         }

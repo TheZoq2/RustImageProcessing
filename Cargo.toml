@@ -6,3 +6,8 @@ authors = ["TheZoq2 <frans.skarman@gmail.com>"]
 [dependencies]
 rscam = "*"
 glium = "*"
+time = "*"
+
+
+[profile.release]
+debug=true
