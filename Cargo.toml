@@ -10,4 +10,4 @@ time = "*"
 
 
 [profile.release]
-debug=true
+#debug=true

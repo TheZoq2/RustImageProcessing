@@ -49,7 +49,6 @@ pub fn kernel_convolution(
         for y in 0..source.resolution.1
         {
             let mut kernel_sum = 0.;
-            let mut kernel_amount = 0;
 
             let radius = kernel.get_radius() as i32;
             for x_offset in -(radius-1)..radius
@@ -63,14 +62,13 @@ pub fn kernel_convolution(
                     {
                         Some(val) => {
                             kernel_sum += val.data as f32 * kernel.get_value(x_offset, y_offset);
-                            kernel_amount += 1;
                         }
                         None => {}
                     }
                 }
             }
 
-            result.set_pixel(x, y, GrayscalePixel::new((kernel_sum / kernel_amount as f32) as u8));
+            result.set_pixel(x, y, GrayscalePixel::new((kernel_sum.abs()) as u8));
         }
     }
 

@@ -10,7 +10,7 @@ use image;
 use image::RgbPixel;
 
 const VERTEX_SHADER: &str = r#"
-    #version 140
+    #version 330
 
     in vec2 position;
     in vec2 tex_coords;
@@ -24,7 +24,7 @@ const VERTEX_SHADER: &str = r#"
 "#;
 
 const FRAGMENT_SHADER: &str = r#"
-    #version 140
+    #version 330
 
     in vec2 v_tex_coords;
     out vec4 color;

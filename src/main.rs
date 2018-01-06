@@ -121,24 +121,44 @@ fn main()
     }).unwrap();
 
     let window = ImageWindow::new((640, 480));
-    let grayscale_window = ImageWindow::new((640, 480));
-    let smoothed_window = ImageWindow::new((640, 480));
+    //let grayscale_window = ImageWindow::new((640, 480));
+    //let smoothed_window = ImageWindow::new((640, 480));
+    let edge_window = ImageWindow::new((640, 480));
 
-    let kernel = {
+    let gauss_kernel = {
         let data = vec!(
-                vec!(1.,1.,1.,1.,1.,1.,1.),
-                vec!(1.,1.,1.,1.,1.,1.,1.),
-                vec!(1.,1.,1.,1.,1.,1.,1.),
-                vec!(1.,1.,1.,1.,1.,1.,1.),
-                vec!(1.,1.,1.,1.,1.,1.,1.),
-                vec!(1.,1.,1.,1.,1.,1.,1.),
-                vec!(1.,1.,1.,1.,1.,1.,1.),
-            );
+                vec!(1., 4.,  6.,  4.,  1.),
+                vec!(4., 16., 24., 16., 4.),
+                vec!(6., 24., 36., 24., 6.),
+                vec!(4., 16., 24., 16., 4.),
+                vec!(1., 4.,  6.,  4.,  1.),
+            ).into_iter()
+            .map(|v| v.into_iter().map(|x| x / 256.).collect())
+            .collect();
 
-        kernel::Kernel::new(4, data)
+        kernel::Kernel::new(3, data)
     };
 
-    for i in (0..10)
+    let vertical_edge_kernel = {
+        let data = vec!(
+                vec!(-1., -0., 1.),
+                vec!(-2.,  0., 2.),
+                vec!(-1., -0., 1.),
+            );
+
+        kernel::Kernel::new(2, data)
+    };
+    let horizontal_edge_kernel = {
+        let data = vec!(
+                vec!(-1., -2.,-1.),
+                vec!( 0.,  0., 0.),
+                vec!( 1.,  2., 1.),
+            );
+
+        kernel::Kernel::new(2, data)
+    };
+
+    loop
     {
         let image = camera.capture().unwrap();
 
@@ -146,11 +166,14 @@ fn main()
 
         let grayscale = rgb_to_greyscale(&rgb_image);
 
-        let smoothed = kernel::kernel_convolution(&grayscale, &kernel);
+        let smoothed = kernel::kernel_convolution(&grayscale, &gauss_kernel);
 
-        //window.draw_image(rgb_image);
+        let edged = kernel::kernel_convolution(&smoothed, &vertical_edge_kernel);
+
+        window.draw_image(rgb_image);
         //grayscale_window.draw_image(&grayscale_to_rgb(&grayscale));
         //smoothed_window.draw_image(&grayscale_to_rgb(&smoothed));
+        edge_window.draw_image(&grayscale_to_rgb(&edged));
 
         window.handle_events();
     }
